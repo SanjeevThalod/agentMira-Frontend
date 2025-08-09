@@ -1,0 +1,455 @@
+/* ========= Overall Layout ========= */
+.home-container {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  background: #fafafa;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+}
+
+/* ========= Chat Section ========= */
+.chat-box {
+  width: 400px;
+  background: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 40px);
+}
+
+.messages-container {
+  flex: 1; /* Takes remaining height */
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  background: white;
+  border-top: 1px solid #ccc;
+  padding: 6px;
+}
+
+.search-input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  outline: none;
+  font-size: 14px;
+}
+
+.send-btn {
+  background-color: rgb(34, 188, 34);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  margin-left: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  border-radius: 6px;
+  transition: background 0.3s ease;
+}
+
+.send-btn:hover {
+  background-color: green;
+}
+
+.chat-message {
+  padding: 8px 10px;
+  margin: 8px 0;
+  border-radius: 6px;
+  max-width: 85%;
+}
+
+.chat-message.bot {
+  background: #f1f5ff;
+  align-self: flex-start;
+}
+
+.chat-message.user {
+  background: #dcf8c6;
+  align-self: flex-end;
+}
+
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  background: #f1f1f1;
+  border-radius: 12px;
+  width: fit-content;
+}
+
+.typing-indicator span {
+  width: 6px;
+  height: 6px;
+  background: #555;
+  border-radius: 50%;
+  display: inline-block;
+  animation: typingBounce 1.2s infinite ease-in-out;
+}
+
+.typing-indicator span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typingBounce {
+  0%, 80%, 100% {
+    transform: scale(0.6);
+    opacity: 0.4;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+
+/* ========= Data Display Section ========= */
+.data-dis {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========= Filter & Compare Section ========= */
+.filter-compare-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+  padding: 12px 20px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.sort-options {
+  display: flex;
+  gap: 20px;
+}
+
+.sort-options label {
+  margin-right: 6px;
+  font-weight: 500;
+}
+
+.sort-options select {
+  padding: 5px 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.compare-btn {
+  background: #0077cc;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 5px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.compare-btn:hover {
+  background: #005fa3;
+}
+
+/* ========= Property Grid ========= */
+.property-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 15px;
+}
+
+.property-card {
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.property-image-container {
+  position: relative;
+}
+
+.property-image {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.compare-overlay-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 119, 204, 0.85);
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.compare-overlay-btn:hover {
+  background: rgba(0, 95, 163, 0.95);
+}
+
+.property-content {
+  padding: 10px;
+}
+
+.property-price {
+  color: blue;
+  font-weight: bold;
+}
+
+/* ========= Compare Modal ========= */
+.compare-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.compare-content {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  max-width: 90%;
+  overflow-x: auto;
+  position: relative;
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: #ff5c5c;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  cursor: pointer;
+}
+
+.compare-table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 600px;
+}
+
+.compare-table th,
+.compare-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+.compare-image {
+  width: 100px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.highlight {
+  background: #e8f7e4;
+  font-weight: bold;
+}
+
+.remove-btn {
+  margin-top: 5px;
+  padding: 4px 8px;
+  border: none;
+  background: #ff5c5c;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.empty-compare-text {
+  text-align: center;
+  padding: 20px;
+}
+.property-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  padding: 10px;
+}
+
+.compare-image-wrapper {
+  width: 120px; /* consistent width */
+  height: 80px; /* consistent height */
+  overflow: hidden;
+  border-radius: 6px;
+}
+
+.compare-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.property-title {
+  font-weight: bold;
+  font-size: 14px;
+  max-width: 140px;
+  word-wrap: break-word;
+}
+/* ==================== RESPONSIVE DESIGN ==================== */
+
+/* Tablet adjustments */
+@media (max-width: 1024px) {
+  .home-container {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .chat-box {
+    width: 100%;
+    height: 50vh;
+  }
+
+  .data-dis {
+    width: 100%;
+  }
+
+  .filter-compare-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .sort-options {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .property-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+
+  .compare-content {
+    max-width: 95%;
+  }
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .home-container {
+    flex-direction: column;
+    padding: 10px;
+  }
+
+  .chat-box {
+    width: 100%;
+    height: 45vh;
+  }
+
+  .search-bar {
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .send-btn {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .filter-compare-section {
+    flex-direction: column;
+    gap: 12px;
+    padding: 10px;
+  }
+
+  .sort-options {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .property-grid {
+    grid-template-columns: 1fr; /* Single column */
+    gap: 12px;
+  }
+
+  .property-image {
+    height: 160px;
+  }
+
+  .compare-table {
+    min-width: unset; /* Allow shrinking */
+    font-size: 12px;
+  }
+
+  .compare-image-wrapper {
+    width: 80px;
+    height: 60px;
+  }
+
+  .property-title {
+    font-size: 12px;
+    max-width: 100px;
+  }
+
+  .compare-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Small phone adjustments */
+@media (max-width: 480px) {
+  .chat-box {
+    height: 40vh;
+  }
+
+  .property-image {
+    height: 140px;
+  }
+
+  .property-title {
+    font-size: 11px;
+  }
+
+  .compare-image-wrapper {
+    width: 70px;
+    height: 50px;
+  }
+
+  .compare-table th,
+  .compare-table td {
+    padding: 6px;
+    font-size: 11px;
+  }
+
+  .close-btn {
+    width: 22px;
+    height: 22px;
+    font-size: 12px;
+  }
+}
+

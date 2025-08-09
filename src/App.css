@@ -1,0 +1,74 @@
+*{
+  margin: 0px;
+  padding: 0px;
+  font-family: 'Inter', sans-serif;
+}
+body{
+  background: #f7f8fa;
+}
+/* Navbar container */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 2rem;
+  background-color: #1a1a2e; /* dark navy */
+  color: #f0f0f0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Logo on left */
+.nav-logo {
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: #f0f0f0;
+  text-decoration: none;
+  letter-spacing: 1.5px;
+}
+
+/* Right side container for user info and buttons */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Greeting text */
+.nav-user {
+  font-weight: 500;
+  font-size: 1rem;
+  color: #ccc;
+}
+
+/* Logout button style */
+.nav-logout-btn {
+  background-color: #e94560; /* red-ish */
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.nav-logout-btn:hover {
+  background-color: #d63347;
+}
+
+/* Login/Signup link style */
+.nav-login-btn {
+  background-color: #0f3460; /* dark blue */
+  color: white;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  border-radius: 4px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.nav-login-btn:hover {
+  background-color: #162a4d;
+}
