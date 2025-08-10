@@ -9,6 +9,7 @@ const Auth = ({setUser}) => {
   // Form state
   const [signInData, setSignInData] = useState({ email: "", password: "" });
   const [signUpData, setSignUpData] = useState({ name: "", email: "", password: "" });
+  const [loading, setLoading] = useState(false);
 
   // Handle change for inputs
   const handleChange = (e, formType) => {
@@ -40,9 +41,11 @@ const Auth = ({setUser}) => {
     }
 
     try {
+      setLoading(true)
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           email: signInData.email.trim(),
           password: signInData.password
@@ -56,6 +59,8 @@ const Auth = ({setUser}) => {
       }
     } catch (error) {
       console.error("Login error:", error);
+    }finally{
+      setLoading(false)
     }
   };
 
@@ -78,9 +83,11 @@ const Auth = ({setUser}) => {
     }
 
     try {
+      setLoading(true)
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           name: signUpData.name.trim(),
           email: signUpData.email.trim(),
@@ -95,6 +102,8 @@ const Auth = ({setUser}) => {
       }
     } catch (error) {
       console.error("Signup error:", error);
+    }finally{
+      setLoading(false)
     }
   };
 
@@ -132,7 +141,7 @@ const Auth = ({setUser}) => {
                 onChange={(e) => handleChange(e, "signin")}
               />
             </div>
-            <input type="submit" value="Login" className="btn solid" />
+            <input type="submit" value={loading ? "Loading..." : "Login"} className="btn solid" disabled={loading} />
 
             <p className="social-text">Or Continue With Google</p>
             <div className="social-media">
@@ -149,9 +158,9 @@ const Auth = ({setUser}) => {
               <i className="fas fa-user"></i>
               <input
                 type="text"
-                name="Name"
+                name="name"
                 placeholder="Name"
-                value={signUpData.username}
+                value={signUpData.name}
                 onChange={(e) => handleChange(e, "signup")}
               />
             </div>
@@ -175,7 +184,7 @@ const Auth = ({setUser}) => {
                 onChange={(e) => handleChange(e, "signup")}
               />
             </div>
-            <input type="submit" className="btn" value="Sign up" />
+            <input type="submit" value={loading ? "Loading..." : "Login"} className="btn solid" disabled={loading} />
 
             <p className="social-text">Or Continue With Google</p>
             <div className="social-media">

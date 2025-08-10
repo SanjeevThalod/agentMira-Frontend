@@ -8,9 +8,22 @@ function Navbar({ user, setUser }) {
   const navigate = useNavigate();
 
   const handleLogout = () => {
+    // Clear React state
     setUser(null);
+
+    // Delete ALL localStorage data
+    localStorage.clear();
+
+    // Delete ALL cookies
+    document.cookie.split(";").forEach(cookie => {
+      const name = cookie.split("=")[0].trim();
+      document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
+    });
+
+    // Redirect to auth page
     navigate("/auth");
   };
+
 
   return (
     <nav className="navbar">

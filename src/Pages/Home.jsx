@@ -1,46 +1,30 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import '../Styles/Home.css';
 import axios from 'axios';
+import PropertyCarousel from '../Components/PropertyCarousel';
 
 const Home = ({ user, setUser }) => {
   const [properties, setProperties] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [search, setSearch] = useState('');
+  const messagesEndRef = useRef(null);
+
   const [messages, setMessages] = useState([
     {
       from: 'bot',
-      text: `Hi!\n Welcome to Agent Mira. I’m here to help you find your perfect property. Tell me what you’re looking for!`,
+      text: `Hi!\nWelcome to Agent Mira. I’m here to help you find your perfect property. Tell me what you’re looking for!`,
+      properties: []
     },
   ]);
+
   const [isTyping, setIsTyping] = useState(false);
-
-
   const [compareList, setCompareList] = useState([]);
   const [showCompare, setShowCompare] = useState(false);
-
   const [sortOption, setSortOption] = useState("");
-
-
-  const sortedProperties = [...filtered].sort((a, b) => {
-    switch (sortOption) {
-      case "price-asc":
-        return a.price - b.price;
-      case "price-desc":
-        return b.price - a.price;
-      case "size-asc":
-        return a.size_sqft - b.size_sqft;
-      case "size-desc":
-        return b.size_sqft - a.size_sqft;
-      default:
-        return 0;
-    }
-  });
-
-
 
   const [result, setResult] = useState({
     location: null,
-    amenities: null,
+    amenities: [],
     min_bedrooms: null,
     max_bedrooms: null,
     min_price: null,
@@ -51,38 +35,70 @@ const Home = ({ user, setUser }) => {
     max_bathrooms: null
   });
 
+  // Sorted properties list
+  const sortedProperties = [...filtered].sort((a, b) => {
+    switch (sortOption) {
+      case "price-asc": return a.price - b.price;
+      case "price-desc": return b.price - a.price;
+      case "size-asc": return a.size_sqft - b.size_sqft;
+      case "size-desc": return b.size_sqft - a.size_sqft;
+      default: return 0;
+    }
+  });
+
+  // Load properties first, then user preferences
   useEffect(() => {
-    const fetchProperties = async () => {
+    const initData = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/data`);
-        const data = await res.json();
-        setProperties(data);
-        setFiltered(data);
+        // Step 1 — Fetch all properties
+        const resProps = await fetch(`${import.meta.env.VITE_API_URL}/api/data`);
+        const allProperties = await resProps.json();
+        setProperties(allProperties);
+        setFiltered(allProperties); // default is all
+
+        // Step 2 — Load user data
+        let activeUser = user;
+        if (!activeUser) {
+          const savedUser = localStorage.getItem("user");
+          if (savedUser) {
+            activeUser = JSON.parse(savedUser);
+            setUser(activeUser);
+          }
+        }
+
+        // Step 3 — Apply preferences if any
+        if (activeUser?.preferences) {
+          setResult(prev => ({ ...prev, ...activeUser.preferences }));
+
+          try {
+            const resFiltered = await axios.post(
+              `${import.meta.env.VITE_API_URL}/api/customData`,
+              { mergedResult: activeUser.preferences }
+            );
+            setFiltered(resFiltered.data);
+          } catch (err) {
+            console.error("Failed to fetch filtered properties:", err);
+          }
+        }
+
+        // Step 4 — Restore messages if any
+        if (activeUser?.messages) {
+          setMessages(activeUser.messages);
+        }
       } catch (err) {
-        console.error('Error fetching properties:', err);
+        console.error("Error initializing data:", err);
       }
     };
-    fetchProperties();
-  }, []);
+
+    initData();
+  }, [user, setUser]);
+
+  // Always scroll chat to bottom on messages change
   useEffect(() => {
-    if (user && user.preferences) {
-      setResult((prev) => ({
-        ...prev,
-        ...user.preferences
-      }));
-    } else {
-      const savedUser = localStorage.getItem("user");
-      if (savedUser) {
-        const parsedUser = JSON.parse(savedUser);
-        if (parsedUser.preferences) {
-          setResult((prev) => ({
-            ...prev,
-            ...parsedUser.preferences
-          }));
-        }
-      }
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [user]);
+  }, [messages]);
 
   const handleSearchQuery = async () => {
     if (search.trim().length < 1) {
@@ -90,7 +106,8 @@ const Home = ({ user, setUser }) => {
       return;
     }
 
-    setMessages((prev) => [...prev, { from: 'user', text: search }]);
+    const newUserMsg = { from: 'user', text: search, properties: [] };
+    setMessages(prev => [...prev, newUserMsg]);
     const mess = search;
     setSearch('');
     setIsTyping(true);
@@ -104,16 +121,20 @@ const Home = ({ user, setUser }) => {
       const parsed = response.data;
       setResult(parsed);
 
-      if (parsed.message) {
-        setMessages((prev) => [...prev, { from: 'bot', text: parsed.message }]);
-      }
-
-      const { message: _unused, ...parsedWithoutMessage } = parsed;
+      const { message: botMessageText, ...parsedWithoutMessage } = parsed;
       const data = await axios.post(`${import.meta.env.VITE_API_URL}/api/customData`, {
         mergedResult: parsedWithoutMessage
       });
 
       setFiltered(data.data);
+
+      const botMsg = {
+        from: 'bot',
+        text: botMessageText,
+        properties: data.data
+      };
+      setMessages(prev => [...prev, botMsg]);
+
       if (user) {
         try {
           await axios.patch(
@@ -121,12 +142,18 @@ const Home = ({ user, setUser }) => {
             parsedWithoutMessage,
             { withCredentials: true }
           );
-          setUser((prevUser) => ({
+          await axios.patch(
+            `${import.meta.env.VITE_API_URL}/api/users/messages`,
+            [...messages, newUserMsg, botMsg],
+            { withCredentials: true }
+          );
+          setUser(prevUser => ({
             ...prevUser,
-            preferences: parsedWithoutMessage
+            preferences: parsedWithoutMessage,
+            messages: [...messages, newUserMsg, botMsg]
           }));
-        } catch (prefError) {
-          console.error('Failed to save preferences:', prefError);
+        } catch (err) {
+          console.error('Failed to save preferences/messages:', err);
         }
       }
 
@@ -139,47 +166,45 @@ const Home = ({ user, setUser }) => {
   };
 
   const handleAddToCompare = (property) => {
-    if (!compareList.some((item) => item.id === property.id)) {
-      setCompareList([...compareList, property]);
+    if (!compareList.some(item => item.id === property.id)) {
+      setCompareList(prev => [...prev, property]);
     }
     setShowCompare(true);
   };
 
   const handleRemoveFromCompare = (id) => {
-    setCompareList(compareList.filter((item) => item.id !== id));
+    setCompareList(prev => prev.filter(item => item.id !== id));
   };
 
-  const maxPrice = Math.max(...compareList.map((p) => p.price), 0);
-  const maxBedrooms = Math.max(...compareList.map((p) => p.bedrooms), 0);
-  const maxBathrooms = Math.max(...compareList.map((p) => p.bathrooms), 0);
-  const maxSize = Math.max(...compareList.map((p) => p.size_sqft), 0);
+  const maxPrice = Math.max(...compareList.map(p => p.price), 0);
+  const maxBedrooms = Math.max(...compareList.map(p => p.bedrooms), 0);
+  const maxBathrooms = Math.max(...compareList.map(p => p.bathrooms), 0);
+  const maxSize = Math.max(...compareList.map(p => p.size_sqft), 0);
 
   return (
     <div className="home-container">
-
       {/* Chat Section */}
       <div className="chat-box">
         <div className="messages-container">
           {messages.map((msg, index) => (
             <div key={index} className={`chat-message ${msg.from}`}>
-              {msg.text}
+              <p>{msg.text}</p>
+              {msg.properties?.length > 0 && (
+                <PropertyCarousel properties={msg.properties} />
+              )}
             </div>
           ))}
           {isTyping && (
             <div className="chat-message bot typing-indicator">
-              <span></span>
-              <span></span>
-              <span></span>
+              <span></span><span></span><span></span>
             </div>
           )}
+          <div ref={messagesEndRef} />
         </div>
 
         <form
           className="search-bar"
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSearchQuery();
-          }}
+          onSubmit={(e) => { e.preventDefault(); handleSearchQuery(); }}
         >
           <input
             type="text"
@@ -192,10 +217,8 @@ const Home = ({ user, setUser }) => {
         </form>
       </div>
 
-
+      {/* Data Display */}
       <div className="data-dis">
-
-        {/* Filter & Compare Section */}
         <div className="filter-compare-section">
           <div className="sort-options">
             <label>Sort by:</label>
@@ -208,31 +231,20 @@ const Home = ({ user, setUser }) => {
             </select>
           </div>
 
-
           {compareList.length > 0 && (
-            <button
-              className="compare-btn"
-              onClick={() => setShowCompare(!showCompare)}
-            >
+            <button className="compare-btn" onClick={() => setShowCompare(!showCompare)}>
               {showCompare ? 'Close Compare' : `Compare (${compareList.length})`}
             </button>
           )}
         </div>
 
-
-        {/* ✅ Property Section now uses sortedProperties */}
         <div className="property-grid">
           {sortedProperties.length > 0 ? (
-            sortedProperties.map((property) => (
+            sortedProperties.map(property => (
               <div key={property.id} className="property-card">
                 <div className="property-image-container">
                   <img src={property.image_url} alt={property.title} className="property-image" />
-                  <button
-                    className="compare-overlay-btn"
-                    onClick={() => handleAddToCompare(property)}
-                  >
-                    Compare
-                  </button>
+                  <button className="compare-overlay-btn" onClick={() => handleAddToCompare(property)}>Compare</button>
                 </div>
                 <div className="property-content">
                   <h3>{property.title}</h3>
@@ -251,13 +263,11 @@ const Home = ({ user, setUser }) => {
         </div>
       </div>
 
-      {/* Compare Modal */}
       {showCompare && (
         <div className="compare-modal">
           <div className="compare-content">
             <h2>Compare Properties</h2>
             <button className="close-btn" onClick={() => setShowCompare(false)}>X</button>
-
             {compareList.length === 0 ? (
               <p className="empty-compare-text">Add properties to compare</p>
             ) : (
@@ -265,7 +275,7 @@ const Home = ({ user, setUser }) => {
                 <thead>
                   <tr>
                     <th>Feature</th>
-                    {compareList.map((property) => (
+                    {compareList.map(property => (
                       <th key={property.id}>
                         <div className="property-header">
                           <div className="compare-image-wrapper">
@@ -273,14 +283,8 @@ const Home = ({ user, setUser }) => {
                           </div>
                           <span className="property-title">{property.title}</span>
                         </div>
-                        <button
-                          className="remove-btn"
-                          onClick={() => handleRemoveFromCompare(property.id)}
-                        >
-                          Remove
-                        </button>
+                        <button className="remove-btn" onClick={() => handleRemoveFromCompare(property.id)}>Remove</button>
                       </th>
-
                     ))}
                   </tr>
                 </thead>
@@ -295,9 +299,7 @@ const Home = ({ user, setUser }) => {
                   </tr>
                   <tr>
                     <td>Location</td>
-                    {compareList.map((p, idx) => (
-                      <td key={idx}>{p.location}</td>
-                    ))}
+                    {compareList.map((p, idx) => <td key={idx}>{p.location}</td>)}
                   </tr>
                   <tr>
                     <td>Bedrooms</td>
@@ -325,9 +327,7 @@ const Home = ({ user, setUser }) => {
                   </tr>
                   <tr>
                     <td>Amenities</td>
-                    {compareList.map((p, idx) => (
-                      <td key={idx}>{p.amenities.join(', ')}</td>
-                    ))}
+                    {compareList.map((p, idx) => <td key={idx}>{p.amenities.join(', ')}</td>)}
                   </tr>
                 </tbody>
               </table>
