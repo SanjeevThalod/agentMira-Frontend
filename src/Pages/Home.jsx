@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import '../Styles/Home.css';
 import axios from 'axios';
 import PropertyCarousel from '../Components/PropertyCarousel';
+import SpeechToTextButton from '../Components/SpeechToTextButton';
 
 const Home = ({ user, setUser }) => {
   const [properties, setProperties] = useState([]);
@@ -176,7 +177,7 @@ const Home = ({ user, setUser }) => {
     setCompareList(prev => prev.filter(item => item.id !== id));
   };
 
-  const maxPrice = Math.max(...compareList.map(p => p.price), 0);
+  const maxPrice = Math.min(...compareList.map(p => p.price), 0);
   const maxBedrooms = Math.max(...compareList.map(p => p.bedrooms), 0);
   const maxBathrooms = Math.max(...compareList.map(p => p.bathrooms), 0);
   const maxSize = Math.max(...compareList.map(p => p.size_sqft), 0);
@@ -214,6 +215,8 @@ const Home = ({ user, setUser }) => {
             className="search-input"
           />
           <button type="submit" className="send-btn">Send</button>
+          <SpeechToTextButton onResult={(text)=>{setSearch(text);}} className="send-btn"/>
+
         </form>
       </div>
 
