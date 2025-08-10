@@ -215,7 +215,7 @@ const Home = ({ user, setUser }) => {
             className="search-input"
           />
           <button type="submit" className="send-btn">Send</button>
-          <SpeechToTextButton onResult={(text)=>{setSearch(text);}} className="send-btn"/>
+          <SpeechToTextButton onResult={(text)=>{setSearch(text);}} className="send-btn mic-btn"/>
 
         </form>
       </div>

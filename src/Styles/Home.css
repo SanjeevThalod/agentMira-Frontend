@@ -35,7 +35,7 @@
   padding: 6px;
   width: 100%;
   box-sizing: border-box;
-  justify-content: center;
+  gap: 6px; /* space between elements */
 }
 
 .search-input {
@@ -62,6 +62,16 @@
 .send-btn:hover {
   background-color: green;
 }
+
+/* Optional: different look for the mic button */
+.mic-btn {
+  background-color: rgb(0, 123, 255);
+}
+
+.mic-btn:hover {
+  background-color: rgb(0, 86, 179);
+}
+
 
 .chat-message {
   padding: 8px 10px;
@@ -430,7 +440,7 @@
 /* Small phone adjustments */
 @media (max-width: 480px) {
   .chat-box {
-    height: 90vh;
+    height: 80vh;
   }
 
   .property-image {
