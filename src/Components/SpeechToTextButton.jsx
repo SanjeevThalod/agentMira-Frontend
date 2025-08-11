@@ -52,6 +52,7 @@ export default function SpeechToTextButton({ onResult }) {
         borderRadius: "8px",
         cursor: listening ? "not-allowed" : "pointer"
       }}
+      className="mic-btn"
     >
       {listening ? "🎙 Listening..." : "🎤 Speak"}
     </button>

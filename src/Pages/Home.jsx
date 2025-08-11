@@ -9,6 +9,8 @@ const Home = ({ user, setUser }) => {
   const [filtered, setFiltered] = useState([]);
   const [search, setSearch] = useState('');
   const messagesEndRef = useRef(null);
+  const [selectedProperty, setSelectedProperty] = useState(null);
+  const [showPropertyModal, setShowPropertyModal] = useState(false);
 
   const [messages, setMessages] = useState([
     {
@@ -215,7 +217,7 @@ const Home = ({ user, setUser }) => {
             className="search-input"
           />
           <button type="submit" className="send-btn">Send</button>
-          <SpeechToTextButton onResult={(text)=>{setSearch(text);}} className="send-btn mic-btn"/>
+          <SpeechToTextButton onResult={(text) => { setSearch(text); }} />
 
         </form>
       </div>
@@ -244,12 +246,18 @@ const Home = ({ user, setUser }) => {
         <div className="property-grid">
           {sortedProperties.length > 0 ? (
             sortedProperties.map(property => (
-              <div key={property.id} className="property-card">
+              <div key={property.id} className="property-card" >
                 <div className="property-image-container">
-                  <img src={property.image_url} alt={property.title} className="property-image" />
+                  <img src={property.image_url} alt={property.title} className="property-image" onClick={() => {
+                    setSelectedProperty(property);
+                    setShowPropertyModal(true);
+                  }} />
                   <button className="compare-overlay-btn" onClick={() => handleAddToCompare(property)}>Compare</button>
                 </div>
-                <div className="property-content">
+                <div className="property-content" onClick={() => {
+                  setSelectedProperty(property);
+                  setShowPropertyModal(true);
+                }}>
                   <h3>{property.title}</h3>
                   <p className="property-price">${property.price.toLocaleString()}</p>
                   <p><strong>Location:</strong> {property.location}</p>
@@ -265,6 +273,28 @@ const Home = ({ user, setUser }) => {
           )}
         </div>
       </div>
+      {showPropertyModal && selectedProperty && (
+        <div className="property-modal-overlay" onClick={() => setShowPropertyModal(false)}>
+          <div
+            className="property-modal-content"
+            onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside
+          >
+            <button className="close-btn" onClick={() => setShowPropertyModal(false)}>X</button>
+            <img
+              src={selectedProperty.image_url}
+              alt={selectedProperty.title}
+              className="property-modal-image"
+            />
+            <h2>{selectedProperty.title}</h2>
+            <p><strong>Price:</strong> ${selectedProperty.price.toLocaleString()}</p>
+            <p><strong>Location:</strong> {selectedProperty.location}</p>
+            <p><strong>Bedrooms:</strong> {selectedProperty.bedrooms}</p>
+            <p><strong>Bathrooms:</strong> {selectedProperty.bathrooms}</p>
+            <p><strong>Size:</strong> {selectedProperty.size_sqft} sq ft</p>
+            <p><strong>Amenities:</strong> {selectedProperty.amenities.join(", ")}</p>
+          </div>
+        </div>
+      )}
 
       {showCompare && (
         <div className="compare-modal">
