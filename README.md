@@ -3,6 +3,9 @@
 Agent Mira is an interactive, AI-powered real estate assistant that helps users search for properties by typing or speaking their requirements.  
 It displays results in a sleek property carousel, with a modal popup for full property details.
 
+- Live Link: https://agent-mira-frontend.vercel.app
+- Github Link: https://github.com/SanjeevThalod/agentMira-Frontend https://github.com/SanjeevThalod/agentMira-Backend
+
 ---
 
 ## 🚀 Features
